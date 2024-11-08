@@ -1,11 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <title>Sensor Data Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 8px 12px; border: 1px solid #ddd; text-align: left; }
+    th { background-color: #f4f4f4; }
+  </style>
 </head>
 <body>
-    PROJECT
+  <h1>Real-Time Sensor Data</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Battery Voltage (V)</th>
+        <th>Flow Rate</th>
+        <th>Timestamp</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% data.forEach(item => { %>
+        <tr>
+          <td><%= item.id %></td>
+          <td><%= item.batteryVoltage %></td>
+          <td><%= item.flowRate %></td>
+          <td><%= item.timestamp %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
 </body>
 </html>
