@@ -1,18 +1,25 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const routes = require('./routes/sensorRoutes');  // Adjusting route import based on provided structure
 const app = express();
+const path = require('path');
+const routes = require('./routes/routes');  
 
-// Middleware and settings
-app.use(express.static('public'));
+
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json()); // Enable JSON parsing for ESP32 POST requests
+app.use(bodyParser.json());
+app.set('views', path.join(__dirname, 'views'));
 
-// Routes
-app.use('/', routes);
 
-// Start the server
-app.listen(8080, () => {
-    console.log('Server initialized on http://localhost:8080');
+app.use(express.static(path.join(__dirname, 'public')));
+
+
+app.use(express.urlencoded({ extended: true }));
+
+app.use('/', routes);  
+
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:8080`);
 });
