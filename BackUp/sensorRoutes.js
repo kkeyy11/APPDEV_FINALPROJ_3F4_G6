@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const sensorController = require('../controllers/forecastController');
+const sensorController = require('../controllers/sensorController');
 
 router.post('/api/data', sensorController.saveSensorData);
 router.get('/', sensorController.getData);
