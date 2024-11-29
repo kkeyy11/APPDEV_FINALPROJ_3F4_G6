@@ -1,35 +1,48 @@
-// controllers/forecastController.js
-const firebaseModel = require('../models/firebaseModel');
-const ARIMA = require('arima');  // For forecasting (you can replace this with any forecasting method)
+  const firebaseModel = require('../models/firebaseModel');
 
-module.exports = {
-  async getForecast(req, res) {
+  module.exports = {
+    async getForecast(req, res) {
+      try {
+        // Fetch real-time data from Firebase
+        const data = await firebaseModel.fetchRealtimeData();
+
+        // Ensure data is in the expected format (voltage and current should be arrays for forecasting)
+        const voltage = data.map(item => item.voltage); // Assuming each item has a 'voltage' value
+        const current = data.map(item => item.current); // Assuming each item has a 'current' value
+
+        // Perform forecasting for voltage and current using a simple moving average
+        const voltageForecast = await forecastData(voltage);
+        const currentForecast = await forecastData(current);
+
+        // Render the view with the real-time data and forecasts
+        res.render('index', { voltage, current, voltageForecast, currentForecast });
+      } catch (error) {
+        console.error('Error in getForecast:', error);
+        res.status(500).send('Error fetching or forecasting data');
+      }
+    }
+  };
+
+  // Function to perform simple forecasting using moving averages
+  async function forecastData(data) {
     try {
-      // Fetch real-time data from Firebase
-      const data = await firebaseModel.fetchRealtimeData();
-      const voltage = data.voltage;
-      const current = data.current;
+      const forecastLength = 3; // Number of future values to forecast
+      const movingAveragePeriod = 5; // Period for the moving average (e.g., average of last 5 data points)
 
-      // Perform forecasting (this is a simple example, you can improve this part)
-      const voltageForecast = forecastData([voltage]);
-      const currentForecast = forecastData([current]);
+      let forecast = [];
 
-      // Render the view with the data and forecasts
-      res.render('index', { voltage, current, voltageForecast, currentForecast });
+      // Calculate the moving average for the last `movingAveragePeriod` data points
+      for (let i = 0; i < forecastLength; i++) {
+        const startIndex = Math.max(0, data.length - movingAveragePeriod);
+        const recentData = data.slice(startIndex);
+        const average = recentData.reduce((sum, value) => sum + value, 0) / recentData.length;
+
+        forecast.push(average);  // Add the forecasted value (moving average)
+      }
+
+      return forecast;
     } catch (error) {
-      console.error(error);
-      res.status(500).send('Error fetching data');
+      console.error('Error in forecastData:', error);
+      throw new Error('Forecasting failed');
     }
   }
-};
-
-// Function to perform simple forecasting using ARIMA
-function forecastData(data) {
-  const arima = new ARIMA({
-    p: 1,  // Auto-regressive terms
-    d: 1,  // Differencing
-    q: 1   // Moving average terms
-  }).train(data);
-
-  return arima.predict(3);  // Forecast the next 3 values
-}

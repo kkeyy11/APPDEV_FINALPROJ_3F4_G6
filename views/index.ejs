@@ -1,11 +1,10 @@
-<!-- views/index.ejs -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Realtime Data Forecast</title>
-  <link rel="stylesheet" href="/public/styles.css">  <!-- Optional CSS -->
+  <link rel="stylesheet" href="/public/styles.css"> 
 </head>
 <body>
   <h1>Realtime Data from Sensors</h1>
@@ -13,8 +12,19 @@
   <h2>Voltage: <%= voltage %> V</h2>
   <h2>Current: <%= current %> A</h2>
 
-  <h2>Forecasted Voltage: <%= voltageForecast %></h2>
-  <h2>Forecasted Current: <%= currentForecast %></h2>
+  <h2>Forecasted Voltage (Next 3 values):</h2>
+  <ul>
+    <% voltageForecast.forEach(function(value) { %>
+      <li><%= value %> V</li>
+    <% }); %>
+  </ul>
+
+  <h2>Forecasted Current (Next 3 values):</h2>
+  <ul>
+    <% currentForecast.forEach(function(value) { %>
+      <li><%= value %> A</li>
+    <% }); %>
+  </ul>
 
 </body>
 </html>

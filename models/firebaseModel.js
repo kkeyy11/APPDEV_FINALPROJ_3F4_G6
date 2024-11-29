@@ -12,7 +12,7 @@ const db = admin.database();
 
 module.exports = {
   fetchRealtimeData: async () => {
-    const ref = db.ref('realtime');  // Path where the data is stored in Firebase
+    const ref = db.ref('realtime');  
     return new Promise((resolve, reject) => {
       ref.once('value', snapshot => {
         const data = snapshot.val();
