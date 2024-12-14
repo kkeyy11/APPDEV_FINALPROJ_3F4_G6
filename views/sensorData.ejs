@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Real-Time Sensor Data</title>
+  <link rel="stylesheet" href="/css/styles.css">  <!-- Fixed path -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Real-Time Sensor Data</h1>
+
+    <!-- Real-Time Line Graph -->
+    <div class="chart-container">
+      <canvas id="sensorChart"></canvas>
+    </div>
+
+    <!-- Table to display sensor data -->
+    <table id="sensorDataTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Voltage</th>
+          <th>Current</th>
+          <th>Timestamp</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% data.forEach(function(record) { %>
+          <tr>
+            <td><%= record.id %></td>
+            <td><%= record.voltage %> V</td>
+            <td><%= record.current %> A</td>
+            <td><%= record.timestamp %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    // Get the context for the charts
+    const voltageChartCtx = document.getElementById('sensorChart').getContext('2d');
+
+    // Initialize the line chart for voltage and current
+    let sensorChart = new Chart(voltageChartCtx, {
+        type: 'line',
+        data: {
+            labels: [], // Placeholder for timestamps
+            datasets: [
+                {
+                    label: 'Voltage (V)',
+                    data: [],
+                    borderColor: 'blue',  // Voltage line color
+                    tension: 0.1,  // Smoothing the line
+                },
+                {
+                    label: 'Current (A)',
+                    data: [],
+                    borderColor: 'red',  // Current line color
+                    tension: 0.1,  // Smoothing the line
+                }
+            ]
+        },
+        options: {
+            scales: {
+                x: {
+                    type: 'linear',
+                    position: 'bottom',
+                }
+            }
+        }
+    });
+
+    // Function to fetch the data from the server
+    async function fetchData() {
+        const response = await fetch('/api/sensordata'); // Make the request to your API
+        const data = await response.json(); // Parse the JSON response
+
+        // Extract labels (timestamps), voltage, and current data
+        const labels = data.map(item => new Date(item.timestamp).toLocaleString());
+        const voltages = data.map(item => item.voltage);
+        const currents = data.map(item => item.current);
+
+        // Update the chart with the latest data
+        sensorChart.data.labels = labels;
+        sensorChart.data.datasets[0].data = voltages;  // Update voltage data
+        sensorChart.data.datasets[1].data = currents;  // Update current data
+        sensorChart.update(); // Update the chart visually
+
+        // Update the table with the latest 5 records (limiting to the last 5 entries)
+        const table = document.getElementById("sensorDataTable");
+        table.innerHTML = data.slice(-5).map(item => `
+            <tr>
+                <td>${item.id}</td>
+                <td>${item.voltage} V</td>
+                <td>${item.current} A</td>
+                <td>${new Date(item.timestamp).toLocaleString()}</td>
+            </tr>
+        `).join('');
+
+        // Estimate battery life based on current data (example calculation)
+        const currentBatteryVoltage = voltages[voltages.length - 1];  // Last recorded voltage
+        const currentFlowRate = currents[currents.length - 1];  // Last recorded current
+
+        const batteryStatus = document.getElementById('batteryStatus');
+        const batteryEstimate = document.getElementById('batteryEstimate');
+
+        // Display current battery voltage
+        batteryStatus.textContent = `${currentBatteryVoltage} V`;
+
+        // Estimate remaining battery life (simplified calculation)
+        const batteryCapacity = 1000;  // Example: 1000 mAh (Adjust as needed)
+        const currentPowerConsumption = currentFlowRate * 0.1;  // Simplified conversion from current to power consumption (mA)
+        const remainingTime = (batteryCapacity / currentPowerConsumption).toFixed(2); // Estimate in hours
+
+        // Display the estimated remaining time
+        batteryEstimate.textContent = `${remainingTime} hours`;
+    }
+
+    // Fetch new data every 1 seconds
+    setInterval(fetchData, 1000);
+
+    // Initial fetch of data when the page loads
+    fetchData();
+</script>
+
+</body>
+</html>

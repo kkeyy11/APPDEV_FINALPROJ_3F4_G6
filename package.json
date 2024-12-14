@@ -1,7 +1,7 @@
 {
   "name": "appdev_finalproj_3f4_g6",
   "version": "1.0.0",
-  "description": "",
+  "description": "kkeyy11 - Young, Ken Mark || elleempenio - Empenio, Ella || 4dapro - Aspi, John Rene || kierpaolo - Pineda, Kier Paolo",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
     "ejs": "^3.1.10",
     "express": "^4.21.1",
     "firebase-admin": "^13.0.1",

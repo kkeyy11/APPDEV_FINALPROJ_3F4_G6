@@ -1,9 +1,15 @@
-// routes/routes.js
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const forecastController = require('../controllers/forecastController');
+const realTimeController = require("../controllers/realTimeController");
 
-// Route for fetching and displaying the forecast
-router.get('/', forecastController.getForecast);  // Main route to display data and forecast
+router.post('/', realTimeController.createSensorData)
+router.get("/", realTimeController.getSensorDatas);
+router.get("/:id", realTimeController.getSensorData);
+router.put("/:id", realTimeController.updateSensorData);
+router.delete("/:id", realTimeController.deleteSensorData);
+
+
+// API route to fetch real-time data
+
 
 module.exports = router;
