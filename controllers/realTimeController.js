@@ -15,10 +15,50 @@ const getSensorDatas = (req, res) => {
     if (err) {
       return res.status(500).json({ message: "Error fetching sensor data", error: err });
     }
-    // Render the EJS template with the sensor data
-    res.render("sensorData", { data: results });
+
+    if (!results || results.length === 0) {
+      return res.render("sensorData", { 
+        data: [], 
+        batteryPercentage: "N/A", 
+        remainingTime: "N/A" 
+      });
+    }
+
+    // Sum all voltages
+    const totalVoltage = results.reduce((sum, record) => sum + record.voltage, 0);
+
+    // Sum all currents
+    const totalCurrent = results.reduce((sum, record) => sum + record.current, 0);
+
+    // The maximum voltage possible: 4.2V per record
+    const maxVoltage = results.length * 4.2;
+
+    // Calculate battery percentage based on the sum of voltages
+    const batteryPercentage = ((totalVoltage / maxVoltage) * 100).toFixed(2);
+
+    // Estimate remaining charging time (simplified calculation)
+    const batteryCapacity = 1000;  // Example battery capacity in mAh
+    const currentFlowRate = totalCurrent * 1000;  // Convert A to mA for the calculation
+
+    // Calculate remaining time based on total current
+    let remainingTime = "N/A";
+    if (batteryPercentage < 100) {
+      if (currentFlowRate > 0) {
+        remainingTime = ((batteryCapacity / currentFlowRate) * 60).toFixed(2); // Time in minutes
+      }
+    } else {
+      remainingTime = "0";  // If the battery is 100%, no charging is needed
+    }
+
+    res.render("sensorData", { 
+      data: results, 
+      batteryPercentage, 
+      remainingTime 
+    });
   });
 };
+
+
 
 const getSensorData = (req, res) => {
   const { id } = req.params;
